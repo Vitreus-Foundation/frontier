@@ -30,8 +30,6 @@ use evm::{
 	gasometer::{GasCost, StorageTarget},
 	ExitError, ExitReason, ExternalOperation, Opcode, Transfer,
 };
-// Cumulus
-use cumulus_primitives_storage_weight_reclaim::get_proof_size;
 // Substrate
 use frame_support::{
 	traits::{
@@ -56,6 +54,15 @@ use crate::{
 	AccountStorages, AddressMapping, BalanceOf, BlockHashMapping, Config, EnsureCreateOrigin,
 	Error, Event, FeeCalculator, OnChargeEVMTransaction, OnCreate, Pallet, RunnerError,
 };
+
+/// Stands in for `cumulus_primitives_storage_weight_reclaim::get_proof_size`, which makes
+/// the runtime import the `storage_proof_size` host function. A relay chain runtime must not
+/// import it: collators with an embedded relay chain node execute relay chain blocks on an
+/// executor without that host function. Relay chain blocks are built and imported without
+/// proof recording, so the real function returns `None` there as well.
+fn get_proof_size() -> Option<u64> {
+	None
+}
 
 #[cfg(feature = "forbid-evm-reentrancy")]
 environmental::environmental!(IN_EVM: bool);
